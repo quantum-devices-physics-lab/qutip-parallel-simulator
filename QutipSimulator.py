@@ -46,7 +46,7 @@ class QuantumSystem(Executable):
         n_osc = len(self.oscillators)
         n_th = 0
         if Ta > 0:
-            n_th = 1/(np.exp(sc.h*w*1e9/(sc.k*Ta))-1)
+            n_th = 1/(np.exp(sc.hbar*w*1e9/(sc.k*Ta))-1)
         
         o = QuantumOscillator(n_osc,n,w,kappa,n_th)
         
