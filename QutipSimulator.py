@@ -11,6 +11,7 @@ import getpass
 import time
 
 
+# This class defines a Quantum Harmonic Oscillator
 class QuantumOscillator:
     def __init__(self,i,n,w,kappa,n_th):
         self.i = i
@@ -21,6 +22,8 @@ class QuantumOscillator:
         
         self.a = create(self.n)
 
+# this is an executable class that defines the run and prepare measurement methods
+# is runned by the pool.async method
 class Executable(object):
     def prepare(self,**prep):
         self.prep = prep
@@ -28,6 +31,7 @@ class Executable(object):
     def run(self):
         pass
 
+# the QuantumSystem class inherit Executable and defines a arbitrary quantum system
 class QuantumSystem(Executable):
     def __init__(self):
         super().__init__()
@@ -35,7 +39,7 @@ class QuantumSystem(Executable):
         self.couplings = []
         self.c_ops = []
         self.operators = []
-    
+
     def add_oscillator(self,n,w,kappa,Ta):
         
         
@@ -83,9 +87,10 @@ class QuantumSystem(Executable):
     
 
 
-def execute(executable):
+def execute(executable,**kwargs):
     return executable.run()
-    
+
+
 def log_email(text,title):
     if "yag" in globals() and "tomail" in globals():
         yag.send(to=tomail,subject=title,contents=text)
