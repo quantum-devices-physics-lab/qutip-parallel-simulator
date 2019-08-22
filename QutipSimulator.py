@@ -63,6 +63,7 @@ class QuantumSystem(Executable):
         self.psi0 = psi0
     
     def update_dissipative_operations(self):
+        self.c_ops = []
         for osc in self.oscillators:
             # cavity relaxation
             rate = osc.kappa * (1 + osc.n_th)
