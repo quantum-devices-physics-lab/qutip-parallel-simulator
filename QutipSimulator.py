@@ -155,18 +155,12 @@ def simulate(name,tasks,argv):
             else:
                 p = float(task_count - incomplete_count) / task_count * 100
                 dif_time = (time.time()-t_start)
-            if p > 0:
-                
-                rem_time = (datetime.timedelta(seconds=int(dif_time*(100-p)/p)))
-
-            else:
-                
-                rem_time = '?'             
+          
 
             if(int(dif_time/3600)-passedAnHour > 0):
                 passedAnHour = int(dif_time/3600)
-                log_email("[%4.1f%%] of the simulations calculated, Estimated Remaining time: %s "%(p,rem_time),name)
-            logger.info("[%4.1f%%] of the simulations calculated, Estimated Remaining time: %s "%(p,rem_time) )
+                log_email("[%4.1f%%] of the simulations calculated, progress time: %s "%(p,datetime.timedelta(seconds=int(dif_time))),name)
+            logger.info("[%4.1f%%] of the simulations calculated, progress time: %s "%(p,datetime.timedelta(seconds=int(dif_time))) )
             
             
             time.sleep(1)
