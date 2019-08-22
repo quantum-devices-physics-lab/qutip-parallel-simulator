@@ -20,7 +20,7 @@ class QuantumOscillator:
         self.kappa = kappa
         self.n_th = n_th
         
-        self.a = create(self.n)
+        self.a = destroy(self.n)
 
 # this is an executable class that defines the run and prepare measurement methods
 # is runned by the pool.async method
