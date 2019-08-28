@@ -11,8 +11,7 @@ import getpass
 import time
 
 
-# This class defines a Quantum Harmonic Oscillator
-class QuantumOscillator:
+class QuantumOscillator():
     def __init__(self,i,n,w,kappa,n_th):
         self.i = i
         self.n = n
@@ -22,16 +21,27 @@ class QuantumOscillator:
         
         self.a = destroy(self.n)
 
-# this is an executable class that defines the run and prepare measurement methods
-# is runned by the pool.async method
 class Executable(object):
     def prepare(self,**prep):
         self.prep = prep
         
-    def run(self):
+    def run(self,**kwargs):
         pass
 
-# the QuantumSystem class inherit Executable and defines a arbitrary quantum system
+class Task(object):
+    
+    def __init__(self, listtask):
+        self.ltask = listtask
+        
+    def add(self, task):
+        self.ltask.append(task)
+    
+    def execute(self,pool):
+        pass
+    
+    def count(self):
+        return len(self.ltask)
+    
 class QuantumSystem(Executable):
     def __init__(self):
         super().__init__()
@@ -39,16 +49,17 @@ class QuantumSystem(Executable):
         self.couplings = []
         self.c_ops = []
         self.operators = []
-
+    
     def add_oscillator(self,n,w,kappa,Ta):
         
         
-        n_osc = len(self.oscillators)
+        i_osc = len(self.oscillators)
         n_th = 0
-        if Ta > 0:
+        if Ta > 0.0:
             n_th = 1/(np.exp(sc.hbar*w*1e9/(sc.k*Ta))-1)
+       
         
-        o = QuantumOscillator(n_osc,n,w,kappa,n_th)
+        o = QuantumOscillator(i_osc,n,w,kappa,n_th)
         
         for osc in self.oscillators:
             osc.a = tensor(osc.a,qeye(o.n))
@@ -85,18 +96,15 @@ class QuantumSystem(Executable):
             H += coupling
        
         return H
+   
+
     
-
-
-def execute(executable,**kwargs):
-    return executable.run()
-
-
+    
 def log_email(text,title):
     if "yag" in globals() and "tomail" in globals():
         yag.send(to=tomail,subject=title,contents=text)
 
-def simulate(name,tasks,argv):
+def simulate(name,task,argv):
 
     filename = name.replace(" ","_")
     
@@ -122,7 +130,7 @@ def simulate(name,tasks,argv):
 
     logger.addHandler(handler)
     
-    task_count = len(tasks)
+    task_count = task.count()
     
     cpu_count = mp.cpu_count()
     
@@ -140,15 +148,15 @@ def simulate(name,tasks,argv):
 
         pool = mp.Pool(processes = cpu_count)
 
-        results = [pool.apply_async(execute,args=(a1,),callback=None,error_callback=None) for a1 in tasks]
+        results = task.execute(pool)
 
         passedAnHour = 0
         while True:
             incomplete_count = sum(1 for x in results if not x.ready())
 
             if incomplete_count == 0:
-                log_email("[100.0%] of the simulation calculated, Estimated Remaing time: 0.0s",name)
-                logger.info("[100.0%] of the simulation calculated, Estimated Remaing time: 0.0s")
+                log_email("[100.0%] of the simulation calculated",name)
+                logger.info("[100.0%] of the simulation calculated")
                 log_email("All done! Total time: %s"%datetime.timedelta(seconds=int(dif_time)),name)
                 logger.info("All done! Total time: %s"%datetime.timedelta(seconds=int(dif_time)))
                 break
