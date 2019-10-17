@@ -50,12 +50,11 @@ class QuantumSystem(Executable):
         self.c_ops = []
         self.operators = []
     
-    def add_oscillator(self,n,w,kappa,Ta):
+    def add_oscillator(self,n,w,kappa,Ta,n_th=0):
         
         
         i_osc = len(self.oscillators)
-        n_th = 0
-        if Ta > 0.0:
+        if n_th == 0 and Ta > 0.0:
             n_th = 1/(np.exp(sc.hbar*w*1e9/(sc.k*Ta))-1)
        
         
@@ -119,7 +118,7 @@ def simulate(name,task,argv):
                 global tomail
                 tomail = sys.argv[idx+1]
 
-    logging.basicConfig(level=logging.INFO)    
+    logging.basicConfig(level=logging.DEBUG)    
     logger = logging.getLogger(name)
 
     handler = logging.FileHandler('log_{}_{}.log'.format(filename,datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")))
@@ -183,20 +182,21 @@ def simulate(name,task,argv):
         
         
 
-    except KeyboardInterrupt as e:
-        log_email("Simulation interrupted by keyboard",name)
-        logger.info("Simulation interrupted by keyboard")
+    
+
+
+        log_email("Saving acquired data",name)
+        logger.info("Saving acquired data")
+
+        data = np.array([ar.get() for ar in results])
+
+        np.save("data_{}_{}".format(filename,datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")),data);
+    except Exception as e:
+        log_email("Simulation interrupted by error",name)
+        logger.exception(e)
         pool.terminate()
         pool.join()
         raise e
-
-
-    log_email("Saving acquired data",name)
-    logger.info("Saving acquired data")
-
-    data = np.array([ar.get() for ar in results])
-    
-    np.save("data_{}_{}".format(filename,datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")),data);
     
     log_email("End of simulation",name)
     logger.info("End of simulation")
