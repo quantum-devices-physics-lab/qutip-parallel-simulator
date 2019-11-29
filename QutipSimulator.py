@@ -204,6 +204,60 @@ def simulate(name,task,argv):
     handler.close()
     logger.removeHandler(handler)
     logging.shutdown()
+    
+def simulateSerially(name,tasks,argv):
+
+    filename = name.replace(" ","_")
+    
+    if len(sys.argv)>=3:
+        for idx,arg in enumerate(sys.argv):
+            if(arg == "-from"):
+                global yag
+                frommail= sys.argv[idx+1]
+                password = getpass.getpass()
+                yag = yagmail.SMTP(frommail, password)
+            if(arg == "-to"):
+                global tomail
+                tomail = sys.argv[idx+1]
+
+    logging.basicConfig(level=logging.DEBUG)    
+    logger = logging.getLogger(name)
+
+    handler = logging.FileHandler('log_{}_{}.log'.format(filename,datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")))
+    handler.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+    
+    logger.info("Starting Simulation")
+    log_email("Starting Simulation",name)
+    
+
+    try:
+        
+        for task in tasks:
+            qsystem = task[0]
+            data = qsystem.run()
+
+            log_email("Saving acquired data","{} - {}".format(name,task[1]))
+            logger.info("Saving acquired data {}".format(task[1]))
+
+            np.save("data_{}_{}_{}".format(filename,datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),task[1]),data);
+            
+    except Exception as e:
+        log_email("Simulation interrupted by error",name)
+        logger.exception(e)
+
+        raise e
+    
+    log_email("End of simulation",name)
+    logger.info("End of simulation")
+
+    handler.close()
+    logger.removeHandler(handler)
+    logging.shutdown()    
 
 
 
